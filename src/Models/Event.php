@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Err0r\Larasub\Models;
 
+use Carbon\Carbon;
 use Err0r\Larasub\Traits\HasConfigurableIds;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -11,8 +14,8 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @property string $event_type
  * @property string $eventable_type
  * @property string|int $eventable_id
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  */
 class Event extends Model
 {

@@ -1,6 +1,7 @@
 {
     "name": "err0r/larasub",
     "description": "Laravel Subscription Package",
+    "version": "1.0.0",
     "keywords": [
         "err0r",
         "laravel",
@@ -9,6 +10,9 @@
     "homepage": "https://github.com/err0r/larasub",
     "license": "MIT",
     "authors": [
+        {
+            "name": "opiy"
+        },
         {
             "name": "Faisal",
             "email": "faisal.s.alnamlah@gmail.com",
@@ -19,7 +23,7 @@
         "php": "^8.3|^8.4|^8.5",
         "illuminate/contracts": "^10.0||^11.0|^12.0|^13.0",
         "spatie/laravel-package-tools": "^1.16",
-        "spatie/laravel-translatable": "^6.8"
+        "spatie/laravel-translatable": "^6.14"
     },
     "require-dev": {
         "laravel/pint": "^1.29",

@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Err0r\Larasub\Models;
 
+use Carbon\Carbon;
 use Err0r\Larasub\Enums\FeatureValue;
 use Err0r\Larasub\Enums\Period;
 use Err0r\Larasub\Traits\HasConfigurableIds;
@@ -17,8 +20,8 @@ use Spatie\Translatable\HasTranslations;
  * @property int $reset_period
  * @property Period $reset_period_type
  * @property int $sort_order
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  * @property-read Plan $plan
  * @property-read Feature $feature
  */

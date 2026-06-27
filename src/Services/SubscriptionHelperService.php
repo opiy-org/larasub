@@ -5,49 +5,55 @@ namespace Err0r\Larasub\Services;
 use Carbon\Carbon;
 use Err0r\Larasub\Facades\PeriodService;
 use Err0r\Larasub\Facades\PlanService;
+use Err0r\Larasub\Models\Plan;
 use Err0r\Larasub\Models\PlanFeature;
+use Err0r\Larasub\Models\Subscription;
+use Err0r\Larasub\Models\SubscriptionFeatureUsage;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
+use InvalidArgumentException;
+use RuntimeException;
 
 final class SubscriptionHelperService
 {
     /**
-     * @param  \Err0r\Larasub\Models\Subscription  $subscription
+     * @param Subscription $subscription
      * @return PlanFeature
      *
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     private function validateSubscriptionFeature($subscription, string $slug)
     {
         $planFeature = $subscription->planFeature($slug);
 
         if ($planFeature === null) {
-            throw new \InvalidArgumentException("The feature '$slug' is not part of the plan");
+            throw new InvalidArgumentException("The feature '$slug' is not part of the plan");
         }
 
         return $planFeature;
     }
 
     /**
-     * @return \Err0r\Larasub\Models\Subscription
+     * @return Subscription
      *
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function validateActiveSubscription($subscriber)
     {
         $subscription = $subscriber->activeSubscription();
 
-        if (! $subscription) {
-            throw new \InvalidArgumentException('No active subscription found.');
+        if (!$subscription) {
+            throw new InvalidArgumentException('No active subscription found.');
         }
 
         return $subscription;
     }
 
     /**
-     * @param  \Err0r\Larasub\Models\Subscription  $subscription
-     * @return \Illuminate\Database\Eloquent\Collection<\Err0r\Larasub\Models\SubscriptionFeatureUsage>
+     * @param Subscription $subscription
+     * @return Collection<SubscriptionFeatureUsage>
      *
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function featureUsageInPeriod($subscription, string $slug): Collection
     {
@@ -65,27 +71,25 @@ final class SubscriptionHelperService
     }
 
     /**
-     * @param  \Err0r\Larasub\Models\Subscription  $subscription
+     * @param Subscription $subscription
      *
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function totalFeatureUsageInPeriod($subscription, string $slug): float
     {
-        $usages = $this->featureUsageInPeriod($subscription, $slug);
-
-        return $usages->sum('value');
+        return $this->featureUsageInPeriod($subscription, $slug)->sum('value');
     }
 
     /**
      * Get the next time a feature will be available for use
      *
-     * @param  \Err0r\Larasub\Models\Subscription  $subscription
-     * @return \Carbon\Carbon|bool|null Returns:
+     * @param Subscription $subscription
+     * @return Carbon|bool|null Returns:
      *                                  - `null`: Feature is unlimited (no usage restrictions)
      *                                  - `false`: Feature is not resettable (one-time use)
      *                                  - `Carbon`: Next time the feature will reset
      *
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function nextAvailableFeatureUsageInPeriod($subscription, string $slug)
     {
@@ -118,10 +122,10 @@ final class SubscriptionHelperService
     /**
      * Get the next time a feature will be available for use
      *
-     * @param  iterable<\Err0r\Larasub\Models\Subscription>  $subscriptions
-     * @return \Carbon\Carbon|bool|null
+     * @param iterable<Subscription> $subscriptions
+     * @return Carbon|bool|null
      *
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function nextAvailableFeatureUsageBySubscriptions(iterable $subscriptions, string $slug)
     {
@@ -131,7 +135,8 @@ final class SubscriptionHelperService
             return false;
         }
 
-        $nextUsages = $subscriptions->map(fn ($subscription) => $this->nextAvailableFeatureUsageInPeriod($subscription, $slug));
+        $nextUsages = $subscriptions->map(fn ($subscription) => $this->nextAvailableFeatureUsageInPeriod($subscription,
+            $slug));
 
         if ($nextUsages->containsStrict(null)) {
             return null;
@@ -141,13 +146,19 @@ final class SubscriptionHelperService
     }
 
     /**
-     * @param  \Illuminate\Database\Eloquent\Model  $subscriber
-     * @param  \Err0r\Larasub\Models\Plan  $plan
-     * @param  \Err0r\Larasub\Models\Subscription|null  $renewedFrom
-     * @return \Err0r\Larasub\Models\Subscription
+     * @param Model $subscriber
+     * @param Plan $plan
+     * @param Subscription|null $renewedFrom
+     * @return Subscription
      */
-    public function subscribe($subscriber, $plan, ?Carbon $startAt = null, ?Carbon $endAt = null, bool $pending = false, $renewedFrom = null)
-    {
+    public function subscribe(
+        $subscriber,
+        $plan,
+        ?Carbon $startAt = null,
+        ?Carbon $endAt = null,
+        bool $pending = false,
+        $renewedFrom = null
+    ) {
         $startAt ??= now();
 
         if ($pending) {
@@ -168,15 +179,15 @@ final class SubscriptionHelperService
             $subscription->renewed_from_id = $renewedFrom->id;
         }
 
-        if (! method_exists($subscriber, 'subscriptions')) {
-            throw new \InvalidArgumentException('The subscriber must have a subscriptions relationship');
+        if (!method_exists($subscriber, 'subscriptions')) {
+            throw new InvalidArgumentException('The subscriber must have a subscriptions relationship');
         }
 
-        /** @var \Err0r\Larasub\Models\Subscription|bool */
+        /** @var Subscription|bool */
         $subscription = $subscriber->subscriptions()->save($subscription);
 
-        if (! $subscription) {
-            throw new \RuntimeException('Failed to create subscription');
+        if (!$subscription) {
+            throw new RuntimeException('Failed to create subscription');
         }
 
         return $subscription;
@@ -185,8 +196,8 @@ final class SubscriptionHelperService
     /**
      * Renew a subscription.
      *
-     * @param  \Err0r\Larasub\Models\Subscription  $subscription
-     * @return \Err0r\Larasub\Models\Subscription
+     * @param Subscription $subscription
+     * @return Subscription
      */
     public function renew($subscription, ?Carbon $startAt = null)
     {

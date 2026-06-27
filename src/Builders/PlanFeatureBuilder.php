@@ -6,6 +6,7 @@ use Err0r\Larasub\Enums\FeatureType;
 use Err0r\Larasub\Enums\FeatureValue;
 use Err0r\Larasub\Enums\Period;
 use Err0r\Larasub\Models\Feature;
+use InvalidArgumentException;
 
 class PlanFeatureBuilder
 {
@@ -17,7 +18,7 @@ class PlanFeatureBuilder
     }
 
     /**
-     * @param  FeatureValue|string|null  $value
+     * @param FeatureValue|string|null $value
      */
     public function value($value): self
     {
@@ -28,7 +29,7 @@ class PlanFeatureBuilder
     }
 
     /**
-     * @param  string|array|null  $displayValue
+     * @param string|array|null $displayValue
      */
     public function displayValue($displayValue): self
     {
@@ -54,10 +55,12 @@ class PlanFeatureBuilder
 
     public function build(): array
     {
-        $featureModel = Feature::where('slug', $this->attributes['slug'])->firstOrFail();
+        $featureModel = Feature::query()
+            ->where('slug', $this->attributes['slug'])
+            ->firstOrFail();
 
         if ($featureModel->type === FeatureType::CONSUMABLE && ($this->attributes['value'] ?? null) === null) {
-            throw new \InvalidArgumentException("The feature '{$this->attributes['slug']}' is consumable and requires a value");
+            throw new InvalidArgumentException("The feature '{$this->attributes['slug']}' is consumable and requires a value");
         }
 
         return [

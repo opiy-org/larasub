@@ -40,7 +40,7 @@ class CheckEndingSubscriptions extends Command
 
     private function processEndingSoonSubscriptions(): void
     {
-        /** @var \Err0r\Larasub\Models\Subscription */
+        /** @var $subscriptionModel Subscription */
         $subscriptionModel = config('larasub.models.subscription');
 
         $endingSoonDays = config('larasub.scheduling.ending_soon_days');
@@ -49,7 +49,8 @@ class CheckEndingSubscriptions extends Command
             ->where('end_at', '>', now())
             ->where('end_at', '<=', now()->addDays($endingSoonDays))
             ->whereDoesntHave('events', function ($query) use ($endingSoonDays) {
-                $query->whereEventType(SubscriptionEndingSoon::class)->where('created_at', '>', now()->subDays($endingSoonDays));
+                $query->whereEventType(SubscriptionEndingSoon::class)->where('created_at', '>',
+                    now()->subDays($endingSoonDays));
             })
             ->get();
 

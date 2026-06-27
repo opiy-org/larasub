@@ -4,12 +4,13 @@ namespace Err0r\Larasub\Services;
 
 use Carbon\Carbon;
 use Err0r\Larasub\Facades\PeriodService;
+use Err0r\Larasub\Models\Plan;
 
 final class PlanService
 {
     /**
-     * @param  \Err0r\Larasub\Models\Plan  $plan
-     * @param  Carbon  $startAt
+     * @param Plan $plan
+     * @param Carbon $startAt
      */
     public function getPlanEndAt($plan, $startAt): ?Carbon
     {

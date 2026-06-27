@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Err0r\Larasub\Models;
 
 use Carbon\Carbon;
@@ -15,6 +17,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use InvalidArgumentException;
+use LogicException;
 
 /**
  * @property string|int $plan_id
@@ -130,7 +134,7 @@ class Subscription extends Model
     }
 
     /**
-     * @param  Builder<static>  $query
+     * @param Builder<static> $query
      * @return Builder<static>
      */
     public function scopeActive(Builder $query): Builder
@@ -144,7 +148,7 @@ class Subscription extends Model
     }
 
     /**
-     * @param  Builder<static>  $query
+     * @param Builder<static> $query
      * @return Builder<static>
      */
     public function scopePending(Builder $query): Builder
@@ -153,7 +157,7 @@ class Subscription extends Model
     }
 
     /**
-     * @param  Builder<static>  $query
+     * @param Builder<static> $query
      * @return Builder<static>
      */
     public function scopeCancelled(Builder $query): Builder
@@ -162,7 +166,7 @@ class Subscription extends Model
     }
 
     /**
-     * @param  Builder<static>  $query
+     * @param Builder<static> $query
      * @return Builder<static>
      */
     public function scopeExpired(Builder $query): Builder
@@ -171,7 +175,7 @@ class Subscription extends Model
     }
 
     /**
-     * @param  Builder<static>  $query
+     * @param Builder<static> $query
      * @return Builder<static>
      */
     public function scopeFuture(Builder $query): Builder
@@ -182,7 +186,7 @@ class Subscription extends Model
     /**
      * Scope for subscriptions that have been renewed
      *
-     * @param  Builder<static>  $query
+     * @param Builder<static> $query
      * @return Builder<static>
      */
     public function scopeRenewed(Builder $query): Builder
@@ -193,7 +197,7 @@ class Subscription extends Model
     /**
      * Scope for subscriptions that haven't been renewed
      *
-     * @param  Builder<static>  $query
+     * @param Builder<static> $query
      * @return Builder<static>
      */
     public function scopeNotRenewed(Builder $query): Builder
@@ -205,7 +209,7 @@ class Subscription extends Model
      * Scope for subscriptions that are due for renewal
      * (active, not renewed, and ending within specified days)
      *
-     * @param  Builder<static>  $query
+     * @param Builder<static> $query
      * @return Builder<static>
      */
     public function scopeDueForRenewal(Builder $query, int $withinDays = 7): Builder
@@ -220,8 +224,8 @@ class Subscription extends Model
     /**
      * Scope a query to only include subscriptions with a specific plan.
      *
-     * @param  Builder<static>  $query
-     * @param  Plan|string  $plan  The plan instance or slug.
+     * @param Builder<static> $query
+     * @param Plan|string $plan The plan instance or slug.
      * @return Builder<static>
      */
     public function scopeWherePlan(Builder $query, $plan): Builder
@@ -237,8 +241,8 @@ class Subscription extends Model
     /**
      * Scope a query to exclude a specific plan.
      *
-     * @param  Builder<static>  $query
-     * @param  Plan|string  $plan  Plan instance or slug
+     * @param Builder<static> $query
+     * @param Plan|string $plan Plan instance or slug
      * @return Builder<static>
      */
     public function scopeWhereNotPlan(Builder $query, $plan): Builder
@@ -249,8 +253,8 @@ class Subscription extends Model
     /**
      * Scope a query to only include subscriptions with a specific feature.
      *
-     * @param  Builder<static>  $query
-     * @param  Feature|string  $feature  The feature instance or slug.
+     * @param Builder<static> $query
+     * @param Feature|string $feature The feature instance or slug.
      * @return Builder<static>
      */
     public function scopeWhereFeature(Builder $query, $feature): Builder
@@ -266,8 +270,8 @@ class Subscription extends Model
     /**
      * Scope a query to exclude a specific feature.
      *
-     * @param  Builder<static>  $query
-     * @param  Feature|string  $feature  The feature instance or slug.
+     * @param Builder<static> $query
+     * @param Feature|string $feature The feature instance or slug.
      * @return Builder<static>
      */
     public function scopeWhereNotFeature(Builder $query, $feature): Builder
@@ -278,8 +282,8 @@ class Subscription extends Model
     /**
      * Scope a query to only include subscriptions which includes specific features.
      *
-     * @param  Builder<static>  $query
-     * @param  iterable<string>  $features  The array of feature slugs to include.
+     * @param Builder<static> $query
+     * @param iterable<string> $features The array of feature slugs to include.
      * @return Builder<static>
      */
     public function scopeWhereFeatures(Builder $query, iterable $features): Builder
@@ -295,8 +299,8 @@ class Subscription extends Model
     /**
      * Scope a query to exclude subscriptions which includes specific features.
      *
-     * @param  Builder<static>  $query
-     * @param  iterable<string>  $features  The array of feature slugs to exclude.
+     * @param Builder<static> $query
+     * @param iterable<string> $features The array of feature slugs to exclude.
      * @return Builder<static>
      */
     public function scopeWhereNotFeatures(Builder $query, iterable $features): Builder
@@ -326,7 +330,7 @@ class Subscription extends Model
      */
     public function isPending(): bool
     {
-        return $this->start_at === null && ! $this->isCancelled();
+        return $this->start_at === null && !$this->isCancelled();
     }
 
     /**
@@ -409,7 +413,7 @@ class Subscription extends Model
     /**
      * Cancel the subscription.
      *
-     * @param  bool|null  $immediately  Whether to cancel the subscription immediately. Defaults to false.
+     * @param bool|null $immediately Whether to cancel the subscription immediately. Defaults to false.
      * @return bool Returns true if the subscription was successfully cancelled, false otherwise.
      */
     public function cancel(?bool $immediately = false): bool
@@ -426,8 +430,8 @@ class Subscription extends Model
     /**
      * Resume the subscription by setting the start and end dates.
      *
-     * @param  Carbon|null  $startAt  The start date of the subscription. If null, the current date and time will be used.
-     * @param  Carbon|null  $endAt  The end date of the subscription. If null, it will be calculated based on the plan.
+     * @param Carbon|null $startAt The start date of the subscription. If null, the current date and time will be used.
+     * @param Carbon|null $endAt The end date of the subscription. If null, it will be calculated based on the plan.
      * @return bool Returns true if the subscription was successfully resumed and saved, false otherwise.
      */
     public function resume(?Carbon $startAt = null, ?Carbon $endAt = null): bool
@@ -442,14 +446,14 @@ class Subscription extends Model
     /**
      * Create a renewal subscription
      *
-     * @param  Carbon|null  $startAt  Custom start date for renewal
+     * @param Carbon|null $startAt Custom start date for renewal
      *
-     * @throws \LogicException If subscription already renewed
+     * @throws LogicException If subscription already renewed
      */
     public function renew(?Carbon $startAt = null): Subscription
     {
         if ($this->isRenewed()) {
-            throw new \LogicException('Subscription has already been renewed');
+            throw new LogicException('Subscription has already been renewed');
         }
 
         $renewal = SubscriptionHelperService::renew($this, $startAt);
@@ -463,7 +467,7 @@ class Subscription extends Model
     /**
      * Retrieve the first plan feature of the subscription's plan by its slug.
      *
-     * @param  string  $slug  The slug of the feature to retrieve.
+     * @param string $slug The slug of the feature to retrieve.
      * @return PlanFeature|null The first plan feature matching the given slug.
      */
     public function planFeature(string $slug)
@@ -474,7 +478,7 @@ class Subscription extends Model
     /**
      * Check if the subscription has a specific feature.
      *
-     * @param  string  $slug  The slug identifier of the feature.
+     * @param string $slug The slug identifier of the feature.
      * @return bool True if the feature exists in the subscription plan, false otherwise.
      */
     public function hasFeature(string $slug): bool
@@ -487,7 +491,7 @@ class Subscription extends Model
      *
      * This method checks if the subscription has the feature and if it is active.
      *
-     * @param  string  $slug  The slug identifier of the feature.
+     * @param string $slug The slug identifier of the feature.
      * @return bool True if the feature is active, false otherwise.
      */
     public function hasActiveFeature(string $slug): bool
@@ -498,10 +502,10 @@ class Subscription extends Model
     /**
      * Calculate the remaining usage for a given feature.
      *
-     * @param  string  $slug  The slug identifier of the feature.
+     * @param string $slug The slug identifier of the feature.
      * @return float The remaining usage of the feature.
      *
-     * @throws \InvalidArgumentException If the feature is not part of the plan, is non-consumable, or has no value.
+     * @throws InvalidArgumentException If the feature is not part of the plan, is non-consumable, or has no value.
      */
     public function remainingFeatureUsage(string $slug): float
     {
@@ -509,11 +513,11 @@ class Subscription extends Model
         $planFeature = $this->planFeature($slug);
 
         if ($planFeature === null) {
-            throw new \InvalidArgumentException("The feature '$slug' is not part of the plan");
+            throw new InvalidArgumentException("The feature '$slug' is not part of the plan");
         }
 
         if ($planFeature->feature->isNonConsumable() || $planFeature->value === null) {
-            throw new \InvalidArgumentException("The feature '$slug' is not consumable or has no value");
+            throw new InvalidArgumentException("The feature '$slug' is not consumable or has no value");
         }
 
         if ($planFeature->isUnlimited()) {
@@ -529,9 +533,9 @@ class Subscription extends Model
     /**
      * Get the next time a feature will be available for use
      *
-     * @param  string  $slug  The feature slug to check
+     * @param string $slug The feature slug to check
      *
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      *
      * @see \Err0r\Larasub\Services\SubscriptionHelperService::nextAvailableFeatureUsageInPeriod()
      */
@@ -543,7 +547,7 @@ class Subscription extends Model
     /**
      * Get the total usage of a feature in the current period.
      *
-     * @param  string  $slug  The slug identifier of the feature.
+     * @param string $slug The slug identifier of the feature.
      * @return float The total usage of the feature in the current period.
      */
     public function totalFeatureUsageInPeriod(string $slug): float
@@ -558,28 +562,28 @@ class Subscription extends Model
      * and verifies if the feature is part of the plan and is consumable. It then
      * checks if the remaining feature usage is sufficient for the requested value.
      *
-     * @param  string  $slug  The slug identifier of the feature.
-     * @param  float  $value  The usage value to check.
+     * @param string $slug The slug identifier of the feature.
+     * @param float $value The usage value to check.
      * @return bool True if the feature can be used, false otherwise.
      *
-     * @throws \InvalidArgumentException If the usage value is less than or equal to 0,
+     * @throws InvalidArgumentException If the usage value is less than or equal to 0,
      *                                   or if the feature is not part of the plan.
      */
     public function canUseFeature(string $slug, float $value): bool
     {
-        if (! $this->isActive()) {
+        if (!$this->isActive()) {
             return false;
         }
 
         if ($value <= 0) {
-            throw new \InvalidArgumentException('Usage value must be greater than 0');
+            throw new InvalidArgumentException('Usage value must be greater than 0');
         }
 
         /** @var PlanFeature|null */
         $planFeature = $this->planFeature($slug);
 
         if ($planFeature === null) {
-            throw new \InvalidArgumentException("The feature '$slug' is not part of the plan");
+            throw new InvalidArgumentException("The feature '$slug' is not part of the plan");
         }
 
         if ($planFeature->feature->isNonConsumable()) {
@@ -592,16 +596,16 @@ class Subscription extends Model
     /**
      * Use a feature of the subscription.
      *
-     * @param  string  $slug  The slug identifier of the feature.
-     * @param  float  $value  The value to be used for the feature.
+     * @param string $slug The slug identifier of the feature.
+     * @param float $value The value to be used for the feature.
      * @return SubscriptionFeatureUsage The usage record of the feature.
      *
-     * @throws \InvalidArgumentException If the feature cannot be used.
+     * @throws InvalidArgumentException If the feature cannot be used.
      */
     public function useFeature(string $slug, float $value)
     {
-        if (! $this->canUseFeature($slug, $value)) {
-            throw new \InvalidArgumentException("The feature '$slug' cannot be used");
+        if (!$this->canUseFeature($slug, $value)) {
+            throw new InvalidArgumentException("The feature '$slug' cannot be used");
         }
 
         /** @var PlanFeature */

@@ -10,6 +10,7 @@
 A powerful and flexible subscription management system for Laravel applications that provides:
 
 ✨ **Core Features**
+
 - 📦 Subscription Plans with tiered pricing
 - 🔄 Flexible billing periods (minute/hour/day/week/month/year)
 - 🎯 Feature-based access control
@@ -17,6 +18,7 @@ A powerful and flexible subscription management system for Laravel applications 
 - 🔋 Consumable and non-consumable features
 
 ⚡ **Key Capabilities**
+
 - 💳 Subscribe users to plans with custom periods
 - 📈 Track feature usage and quotas
 - ⏰ Built-in subscription lifecycle events
@@ -27,12 +29,14 @@ A powerful and flexible subscription management system for Laravel applications 
 - 🎚️ Customizable usage limits
 
 🛠️ **Developer Experience**
+
 - 🧩 Simple trait-based integration
 - ⚙️ Configurable tables and models
 - 📝 Comprehensive event system
 - 🔌 UUID support out of the box
 
 ## Table of Contents
+
 - [Installation](#installation)
 - [Basic Usage](#basic-usage)
 - [Advanced Usage](#advanced-usage)
@@ -43,6 +47,7 @@ A powerful and flexible subscription management system for Laravel applications 
 - [Security Vulnerabilities](#security-vulnerabilities)
 - [Credits](#credits)
 - [License](#license)
+- [Run in Docker](#run-in-docker)
 
 ## Installation
 
@@ -65,10 +70,61 @@ php artisan vendor:publish --tag="larasub-migrations"
 php artisan migrate
 ```
 
+## Run in Docker
+
+The repository includes a ready-to-use Docker environment for local development and testing of the package using the
+Workbench app.
+
+Prerequisites:
+
+- Docker and Docker Compose
+
+Start the stack (first run may take a while):
+
+```bash
+docker compose up -d --build
+```
+
+Open the app:
+
+```
+http://localhost:8080
+```
+
+Useful commands:
+
+- Run tests
+  ```bash
+  docker compose exec app composer test
+  ```
+- Run Laravel Artisan in the Workbench
+  ```bash
+  docker compose exec app php vendor/bin/testbench artisan migrate
+  ```
+- Stop and remove containers (keep DB data)
+  ```bash
+  docker compose down
+  ```
+- Stop and remove containers with volumes (wipe DB data)
+  ```bash
+  docker compose down -v
+  ```
+
+Services:
+
+- app: PHP 8.3 FPM + Composer
+- web: Nginx (serves Workbench from workbench/public) at http://localhost:8080
+- db: MySQL 8 (exposed on localhost:33060)
+- redis: Redis 7
+
+Environment:
+
+- A template env for Workbench is provided in `workbench/.env.docker` and applied automatically on first start.
+
 ## Basic Usage
 
 - **Setup the Subscriber Model**  
-   Add the `HasSubscription` trait to your model:
+  Add the `HasSubscription` trait to your model:
 
     ```php
     <?php
@@ -103,8 +159,8 @@ php artisan migrate
     ```
 
 - **Create a Plan**
-    
-    Create subscription plans using the `PlanBuilder` class. When configuring a plan's features, you can specify:
+
+  Create subscription plans using the `PlanBuilder` class. When configuring a plan's features, you can specify:
 
     - Feature values and display names
     - Consumption mode (consumable vs non-consumable)
@@ -282,14 +338,14 @@ php artisan migrate
     $subscription->wasJustRenewed();      // null -> id for renewed_from_id
     ```
 
-    These methods help detect when a subscription's status has just changed:
+  These methods help detect when a subscription's status has just changed:
     - `hasStatusTransitioned()`: Checks if any status transition occurred
     - `wasJustActivated()`: Detects activation (start date set)
     - `wasJustCancelled()`: Detects cancellation (cancel date set)
     - `wasJustResumed()`: Detects resumption (cancel date cleared)
     - `wasJustRenewed()`: Detects renewal (renewal ID set)
 
-- **Feature Management**   
+- **Feature Management**
 
     ```php
     <?php
@@ -322,14 +378,15 @@ php artisan migrate
 
 - **Events**
 
-    The package dispatches events for subscription lifecycle:
+  The package dispatches events for subscription lifecycle:
     - `SubscriptionEnded` - When a subscription expires
     - `SubscriptionEndingSoon` - When a subscription is ending soon (configurable in `larasub.php`. Default: 7 days)
 
-    > By default, the package includes a task schedule that runs every minute to check for subscriptions that have ended or are ending soon, and triggers the corresponding events.   
-    > You can modify this schedule in the `larasub.php` configuration file.
+  > By default, the package includes a task schedule that runs every minute to check for subscriptions that have ended
+  or are ending soon, and triggers the corresponding events.   
+  > You can modify this schedule in the `larasub.php` configuration file.
 
-    **Event Listener Example:**
+  **Event Listener Example:**
     ```php
     <?php
 
@@ -360,27 +417,32 @@ The package provides several resource classes to transform your models into JSON
 - [`PlanResource`](src/Resources/PlanResource.php): Transforms a plan model.
 - [`PlanFeatureResource`](src/Resources/PlanFeatureResource.php): Transforms a plan feature model.
 - [`SubscriptionResource`](src/Resources/SubscriptionResource.php): Transforms a subscription model.
-- [`SubscriptionFeatureUsageResource`](src/Resources/SubscriptionFeatureUsageResource.php): Transforms a subscription feature usage model.
+- [`SubscriptionFeatureUsageResource`](src/Resources/SubscriptionFeatureUsageResource.php): Transforms a subscription
+  feature usage model.
 
 ## Testing
-> TODO   
+
+> TODO
 
 ```bash
 composer test
 ```
 
 ## Changelog
-> TODO   
+
+> TODO
 
 Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed recently.
 
 ## Contributing
-> TODO   
+
+> TODO
 
 Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
 
 ## Security Vulnerabilities
-> TODO   
+
+> TODO
 
 Please review [our security policy](../../security/policy) on how to report security vulnerabilities.
 

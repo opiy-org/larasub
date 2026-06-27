@@ -69,8 +69,8 @@ class PlanBuilder
     }
 
     /**
-     * @param  Feature|string  $feature  The feature model or slug
-     * @param  callable(PlanFeatureBuilder): PlanFeatureBuilder  $callback  The callback to build the feature
+     * @param Feature|string $feature The feature model or slug
+     * @param callable(PlanFeatureBuilder): PlanFeatureBuilder $callback The callback to build the feature
      */
     public function addFeature($feature, callable $callback): self
     {
@@ -85,10 +85,11 @@ class PlanBuilder
 
     public function build(): Plan
     {
-        $plan = Plan::updateOrCreate(
-            ['slug' => $this->attributes['slug']],
-            $this->attributes
-        );
+        $plan = Plan::query()
+            ->updateOrCreate(
+                ['slug' => $this->attributes['slug']],
+                $this->attributes
+            );
 
         // Attach features
         foreach ($this->features as $feature) {

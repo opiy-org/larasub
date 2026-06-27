@@ -57,11 +57,10 @@ class FeatureBuilder
 
     public function build(): Feature
     {
-        $feature = Feature::updateOrCreate(
-            ['slug' => $this->attributes['slug']],
-            $this->attributes
-        );
-
-        return $feature;
+        return Feature::query()
+            ->updateOrCreate(
+                ['slug' => $this->attributes['slug']],
+                $this->attributes
+            );
     }
 }

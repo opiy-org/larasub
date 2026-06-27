@@ -2,12 +2,13 @@
 
 namespace Err0r\Larasub\Traits;
 
+use Carbon\Carbon;
 use Err0r\Larasub\Facades\SubscriptionHelperService;
-use Err0r\Larasub\Models\Feature;
 use Err0r\Larasub\Models\PlanFeature;
 use Err0r\Larasub\Models\Subscription;
 use Err0r\Larasub\Models\SubscriptionFeatureUsage;
 use Illuminate\Database\Eloquent\Collection;
+use InvalidArgumentException;
 
 trait HasSubscription
 {
@@ -62,9 +63,7 @@ trait HasSubscription
      */
     public function planFeature(string $slug)
     {
-        $subscription = SubscriptionHelperService::validateActiveSubscription($this);
-
-        return $subscription->planFeature($slug);
+        return SubscriptionHelperService::validateActiveSubscription($this)->planFeature($slug);
     }
 
     /**
@@ -72,9 +71,7 @@ trait HasSubscription
      */
     public function hasFeature(string $slug): bool
     {
-        $subscription = SubscriptionHelperService::validateActiveSubscription($this);
-
-        return $subscription->hasFeature($slug);
+        return SubscriptionHelperService::validateActiveSubscription($this)->hasFeature($slug);
     }
 
     /**
@@ -92,26 +89,24 @@ trait HasSubscription
      */
     public function remainingFeatureUsage(string $slug): ?float
     {
-        $subscription = SubscriptionHelperService::validateActiveSubscription($this);
-
-        return $subscription->remainingFeatureUsage($slug);
+        return SubscriptionHelperService::validateActiveSubscription($this)
+            ->remainingFeatureUsage($slug);
     }
 
     /**
      * Get the next time a feature will be available for use
      *
-     * @param  string  $slug  The feature slug to check
-     * @return \Carbon\Carbon|bool|null
+     * @param string $slug The feature slug to check
+     * @return Carbon|bool|null
      *
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      *
-     * @see \Err0r\Larasub\Models\Subscription::nextAvailableFeatureUsage
+     * @see Subscription::nextAvailableFeatureUsage
      */
     public function nextAvailableFeatureUsage(string $slug)
     {
-        $subscription = SubscriptionHelperService::validateActiveSubscription($this);
-
-        return $subscription->nextAvailableFeatureUsage($slug);
+        return SubscriptionHelperService::validateActiveSubscription($this)
+            ->nextAvailableFeatureUsage($slug);
     }
 
     /**
@@ -119,9 +114,8 @@ trait HasSubscription
      */
     public function canUseFeature(string $slug, float $value): bool
     {
-        $subscription = SubscriptionHelperService::validateActiveSubscription($this);
-
-        return $subscription->canUseFeature($slug, $value);
+        return SubscriptionHelperService::validateActiveSubscription($this)
+            ->canUseFeature($slug, $value);
     }
 
     /**
@@ -129,12 +123,11 @@ trait HasSubscription
      *
      * @return SubscriptionFeatureUsage
      *
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function useFeature(string $slug, float $value)
     {
-        $subscription = SubscriptionHelperService::validateActiveSubscription($this);
-
-        return $subscription->useFeature($slug, $value);
+        return SubscriptionHelperService::validateActiveSubscription($this)
+            ->useFeature($slug, $value);
     }
 }

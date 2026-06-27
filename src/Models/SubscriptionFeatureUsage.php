@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Err0r\Larasub\Models;
 
+use Carbon\Carbon;
 use Err0r\Larasub\Traits\HasConfigurableIds;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -11,8 +14,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string|int $subscription_id
  * @property string|int $feature_id
  * @property string $value
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  * @property-read Subscription $subscription
  * @property-read Feature $feature
  */
